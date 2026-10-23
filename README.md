@@ -688,29 +688,71 @@ To make Harness run automatically every time you push code to GitHub:
 +-----------------------------------------------------------------+
 ```
 
-6. **Step 2: Conditions (Filters):**
-   - Under **Conditions**, click **+ Add Condition**.
-   - **Filter Type:** `Branch Name`
-   - **Operator:** `equals`
-   - **Value:** `main` (or `master` depending on your active branch).
+6. **Step 2: Conditions (Filters Screen):**
+   In this screen, you tell Harness when this trigger should execute (e.g., only when code is pushed to your working branch).
+
+   - **Evaluation Rule:** Keep the default `All conditions must be met (AND)`.
+   - **Condition Row:**
+     - **Attribute:** In the first dropdown, select **`Branch Name`**.
+     - **Operator:** In the second dropdown, select **`Equals`** (or **`In`** if supporting multiple branches).
+     - **Matches Value:** Enter your repository's branch name: **`master`** (or `main`).
+       > **Note:** Run `git branch --show-current` in your terminal to verify your branch. In this repository, the active branch is `master`.
+       > *Tip:* If you want the trigger to run on either `master` or `main`, select Operator **`Regex`** and enter `^(master|main)$`.
    - Click **Continue**.
 
 ```
-+-----------------------------------------------------------------+
-| Conditions                                                      |
-+-----------------------------------------------------------------+
-| Match: (All Conditions)                                         |
-|                                                                 |
-| [ Branch Name v ]  [ equals v ]  [ main                       ] |
-|                                                                 |
-|                                                      [Continue] |
-+-----------------------------------------------------------------+
++-----------------------------------------------------------------------------------------+
+| Conditions                                                                              |
++-----------------------------------------------------------------------------------------+
+| How should conditions be evaluated?                                                     |
+| (*) All conditions must be met (AND)      ( ) Any condition can be met (OR)             |
+|                                                                                         |
+| Attribute                 Operator            Matches Value                             |
+| [ Branch Name         v ] [ Equals        v ] [ master                                ] |
+|                                                                                         |
+| [+ Add Condition]                                                                       |
+|                                                                              [Continue] |
++-----------------------------------------------------------------------------------------+
 ```
 
-7. **Step 3: Pipeline Input:**
-   - Under `build`: Set value to `<+trigger.commitSha>` (Resolves the exact commit SHA that was pushed).
-   - Under `dockerhub_username`: Enter your Docker Hub username.
-   - Click **Create Trigger**.
+7. **Step 3: Pipeline Input (Inputs Screen):**
+   This screen configures what values are passed to the pipeline when triggered. It is divided into two sections corresponding to the `<+input>` variables defined in `pipeline.yaml`:
+
+   #### Section A: Codebase / Build
+   This determines which commit or branch Harness should clone and build.
+   - **If you see "Build Type" options (Radio buttons or Dropdown):**
+     - Select **`Commit SHA`** and enter: `<+trigger.commitSha>`
+     - *(Alternatively, select **`Git Branch`** and enter: `<+trigger.branch>`)*
+   - **If you see a text input field for Branch / Build:**
+     - Notice the small value-type toggle icon (e.g., `T`, `fx`, or `<+>`) next to the input field.
+     - Click the toggle and choose **`Expression`** (`<+>`).
+     - Enter: `<+trigger.commitSha>` (or `<+trigger.branch>`).
+   
+   > **Why this expression?** `<+trigger.commitSha>` tells Harness to build the exact commit SHA that was pushed in the GitHub webhook payload, ensuring an immutable build.
+
+   #### Section B: Pipeline Variables
+   - **`dockerhub_username` (* Required):**
+     - Type your actual Docker Hub username (e.g., `johndoe`).
+   - **`dockerhub_repo_name`:**
+     - Pre-filled with the default: `employee-service` (leave as is, or enter your custom repo name).
+
+   - Click the blue button at the bottom: **`Create Trigger`**.
+
+```
++-----------------------------------------------------------------------------------------+
+| Pipeline Input                                                                          |
++-----------------------------------------------------------------------------------------+
+| Codebase Configuration                                                                  |
+| Build Type:  ( ) Git Branch    (*) Commit SHA                                           |
+| Commit SHA:  [ <+trigger.commitSha>                                                   ] |
+|                                                                                         |
+| Pipeline Variables                                                                      |
+| dockerhub_username *: [ yourdockerhubusername                                         ] |
+| dockerhub_repo_name:  [ employee-service                                              ] |
+|                                                                                         |
+|                                                              [Cancel]  [Create Trigger] |
++-----------------------------------------------------------------------------------------+
+```
 
 *Verification:* Harness will automatically call GitHub's API via `github_connector` and register a webhook in your GitHub repository (**Settings** ➔ **Webhooks**).
 
