@@ -7,7 +7,7 @@
 # ------------------------------------------------------------------------------
 # Stage 1: Build & Package
 # ------------------------------------------------------------------------------
-FROM maven:3.9.9-eclipse-temurin-21-alpine AS builder
+FROM maven:3.9.12-eclipse-temurin-25-alpine AS builder
 
 WORKDIR /build
 
@@ -25,7 +25,7 @@ RUN mvn clean package -DskipTests=false -Dnet.bytebuddy.experimental=true
 # ------------------------------------------------------------------------------
 # Stage 2: Production Hardened Minimal Runtime
 # ------------------------------------------------------------------------------
-FROM eclipse-temurin:21-jre-alpine AS runtime
+FROM eclipse-temurin:25-jre-alpine AS runtime
 
 LABEL maintainer="DevOps Team <devops@example.com>"
 LABEL service="employee-service"

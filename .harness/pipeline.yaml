@@ -49,7 +49,7 @@ pipeline:
                   identifier: compile_source
                   spec:
                     connectorRef: account.harnessImage
-                    image: maven:3.9.9-eclipse-temurin-21-alpine
+                    image: maven:3.9.12-eclipse-temurin-25-alpine
                     shell: Sh
                     command: |-
                       echo "============================================="
@@ -66,7 +66,7 @@ pipeline:
                   identifier: run_unit_tests
                   spec:
                     connectorRef: account.harnessImage
-                    image: maven:3.9.9-eclipse-temurin-21-alpine
+                    image: maven:3.9.12-eclipse-temurin-25-alpine
                     shell: Sh
                     command: |-
                       echo "============================================="
@@ -87,7 +87,7 @@ pipeline:
                   identifier: run_integration_tests
                   spec:
                     connectorRef: account.harnessImage
-                    image: maven:3.9.9-eclipse-temurin-21-alpine
+                    image: maven:3.9.12-eclipse-temurin-25-alpine
                     shell: Sh
                     command: |-
                       echo "============================================="

@@ -1,7 +1,7 @@
 # Production-Style Spring Boot Application Repository for Harness CI
 
 [![Java](https://img.shields.io/badge/Java-25%20LTS%20(Release%2021%20Bytecode)-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.16-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Build Tool](https://img.shields.io/badge/Maven-3.9+-C71A36.svg)](https://maven.apache.org/)
 [![Container](https://img.shields.io/badge/Docker-Multi--Stage%20Hardened-blue.svg)](https://www.docker.com/)
 [![CI/CD](https://img.shields.io/badge/Harness%20CI-Pipeline%20YAML-00ADEF.svg)](https://harness.io/)
@@ -54,7 +54,7 @@ A production-grade, enterprise-architected Spring Boot microservice designed spe
 ```
 
 ### Application Design Highlights
-- **Framework & Runtime:** Spring Boot 3.4.2 running on **Java 25 LTS** with `--release 21` bytecode compilation for full ASM and ByteBuddy runtime stability.
+- **Framework & Runtime:** Spring Boot 3.5.16 running on **Java 25 LTS** with `--release 21` bytecode compilation for compatibility with existing bytecode consumers.
 - **REST CRUD API:** Complete employee management (`/api/v1/employees`) supporting JSON payloads, URI Location headers on creation, pagination-ready structure, and HTTP 204 No Content deletions.
 - **Robust Validation:** JSR-380 Bean Validation (`@NotBlank`, `@Email`, `@NotNull`, `@PositiveOrZero`, `@Size`) with standardized RFC 7807 problem details in `GlobalExceptionHandler`.
 - **Health Checks:** Built-in Spring Boot Actuator (`/actuator/health`, `/actuator/info`) plus dedicated `/api/v1/health` endpoint reporting uptime, service identifier, and Java version.
@@ -62,7 +62,7 @@ A production-grade, enterprise-architected Spring Boot microservice designed spe
 - **In-Memory Thread-Safe Persistence:** Concurrent storage with pre-seeded demo records (`Sarah Connor`, `John Doe`, `Alex Murphy`), eliminating external database spin-up latency during CI runs.
 - **Fail-Fast Testing Strategy:** Maven Surefire and Failsafe plugins enforce `<testFailureIgnore>false</testFailureIgnore>`, halting the build immediately upon test regression.
 - **Production-Hardened Container:**
-  - Multi-stage build (Builder: Maven 3.9 + Temurin 21; Runtime: Temurin 21 JRE Alpine).
+  - Multi-stage build (Builder: Maven 3.9.12 + Temurin 25; Runtime: Temurin 25 JRE Alpine).
   - Enforced non-root user (`appuser:appgroup`, UID 10001).
   - Native Docker `HEALTHCHECK` hitting `/actuator/health`.
   - Cgroup-aware container JVM parameters (`-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0`).
@@ -124,7 +124,7 @@ A production-grade, enterprise-architected Spring Boot microservice designed spe
 
 ### Prerequisites
 Ensure the following tools are installed on your Windows 11 workstation:
-1. **Oracle JDK 25 LTS** (or JDK 21+): [Oracle Java Downloads](https://www.oracle.com/java/technologies/downloads/)
+1. **Oracle JDK 25 LTS**: [Oracle Java Downloads](https://www.oracle.com/java/technologies/downloads/)
 2. **Apache Maven 3.9+**: [Maven Downloads](https://maven.apache.org/download.cgi)
 3. **Docker Desktop for Windows**: [Docker Desktop](https://www.docker.com/products/docker-desktop/) (with WSL2 backend enabled)
 4. **Git for Windows**: [Git SCM](https://git-scm.com/)
@@ -132,7 +132,7 @@ Ensure the following tools are installed on your Windows 11 workstation:
 ### Step 1: Open PowerShell as Administrator or Standard User
 Verify tool installations:
 ```powershell
-# Verify Java version (shows Java 25 or 21)
+# Verify Java version (shows Java 25)
 java -version
 
 # Verify Maven version
@@ -487,7 +487,7 @@ Prove that when all tests pass, the pipeline tags the Docker container with the 
 | :--- | :--- | :--- |
 | `Cannot connect to Docker daemon` | Docker Desktop is not started on Windows 11. | Launch Docker Desktop from the Start menu and wait until the status displays "Engine running". |
 | `Java 25 (69) is not supported by Byte Buddy` | ByteBuddy agent running on JDK 25 without experimental flag. | Pass `-Dnet.bytebuddy.experimental=true` in `argLine` (already configured in `pom.xml`). |
-| `ASM ClassReader failed to parse class file` | Spring Framework attempting to scan Java 25 bytecode. | Keep `maven.compiler.release` set to `21` in `pom.xml` so bytecode is 100% compatible with Spring Boot 3.4.2 while running on JDK 25. |
+| `ASM ClassReader failed to parse class file` | A bytecode consumer cannot parse Java 25 class files. | Keep `maven.compiler.release` set to `21` in `pom.xml`; the service runs on Java 25 while emitting Java 21-compatible bytecode. |
 | Harness step fails: `Connector github_connector not found` | The identifier in `pipeline.yaml` doesn't match the connector in Harness UI. | Ensure the connector identifier in Harness Project Settings is exactly `github_connector`. |
 | Harness step fails: `denied: requested access to the resource is denied` | Docker Hub token lacks write permissions or username mismatch. | Verify the Docker Hub Personal Access Token has `Read, Write, Delete` permissions and secret `dockerhub_username` matches the repository namespace. |
 | PowerShell argument parse error on `-D` flags | PowerShell treats `-Dproperty=value` as an operator. | Always wrap Java/Maven system properties in double quotes: `mvn test "-Dfail.ci.build=true"`. |
