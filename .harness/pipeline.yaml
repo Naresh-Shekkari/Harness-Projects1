@@ -40,6 +40,7 @@ pipeline:
             arch: Amd64
           runtime:
             type: Cloud
+            spec: {}
           execution:
             steps:
               # Step 1: Compile Java Source
@@ -116,6 +117,7 @@ pipeline:
             arch: Amd64
           runtime:
             type: Cloud
+            spec: {}
           execution:
             steps:
               # Step: Build and Push Docker Image using native Harness Step
