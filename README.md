@@ -885,4 +885,4 @@ Prove that when all tests pass, the pipeline tags the Docker container with the 
 
 ## License & Attribution
 
-Distributed under the Apache 2.0 License. Designed for DevOps engineers, SREs, and cloud architects learning enterprise CI/CD with Harness.
+## Distributed under the Apache 2.0 License. Designed for ## DevOps engineers, SREs, and cloud architects learning ## enterprise CI/CD with Harness.
