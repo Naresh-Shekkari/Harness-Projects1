@@ -1,0 +1,135 @@
+pipeline:
+  name: employee-service-ci
+  identifier: employeeserviceci
+  projectIdentifier: default_project
+  orgIdentifier: default
+  tags:
+    service: employee-service
+    tier: backend
+    framework: spring-boot
+  variables:
+    - name: dockerhub_username
+      type: String
+      description: Docker Hub account username or organization name
+      required: true
+      value: <+input>
+    - name: dockerhub_repo_name
+      type: String
+      description: Docker Hub repository name
+      required: false
+      value: employee-service
+  properties:
+    ci:
+      codebase:
+        connectorRef: github_connector
+        repoName: employee-service
+        build: <+input>
+  stages:
+    # --------------------------------------------------------------------------
+    # Stage 1: Source Compilation & Test Gates
+    # --------------------------------------------------------------------------
+    - stage:
+        name: Build and Verify Tests
+        identifier: build_and_verify_tests
+        description: Clones repository, compiles Java bytecode, and enforces Unit & Integration test gates
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+          execution:
+            steps:
+              # Step 1: Compile Java Source
+              - step:
+                  type: Run
+                  name: Compile Source
+                  identifier: compile_source
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: maven:3.9.9-eclipse-temurin-21-alpine
+                    shell: Sh
+                    command: |-
+                      echo "============================================="
+                      echo "Compiling Spring Boot Employee Service..."
+                      echo "Commit SHA: <+codebase.commitSha>"
+                      echo "Branch: <+codebase.branch>"
+                      echo "============================================="
+                      mvn clean compile -B
+
+              # Step 2: Run Unit Tests (Surefire)
+              - step:
+                  type: Run
+                  name: Run Unit Tests
+                  identifier: run_unit_tests
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: maven:3.9.9-eclipse-temurin-21-alpine
+                    shell: Sh
+                    command: |-
+                      echo "============================================="
+                      echo "Executing Surefire Unit Tests..."
+                      echo "Enforcing strict test failure (testFailureIgnore=false)..."
+                      echo "============================================="
+                      mvn test -B -Dnet.bytebuddy.experimental=true
+                    reports:
+                      type: JUnit
+                      spec:
+                        paths:
+                          - target/surefire-reports/*.xml
+
+              # Step 3: Run Integration Tests (Failsafe)
+              - step:
+                  type: Run
+                  name: Run Integration Tests
+                  identifier: run_integration_tests
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: maven:3.9.9-eclipse-temurin-21-alpine
+                    shell: Sh
+                    command: |-
+                      echo "============================================="
+                      echo "Executing Failsafe Integration Tests..."
+                      echo "Testing Actuator Health, REST CRUD, and MDC propagation..."
+                      echo "============================================="
+                      mvn verify -B -DskipUnitTests=true -Dnet.bytebuddy.experimental=true
+                    reports:
+                      type: JUnit
+                      spec:
+                        paths:
+                          - target/failsafe-reports/*.xml
+
+    # --------------------------------------------------------------------------
+    # Stage 2: Multi-Stage Docker Image Build & Registry Publication
+    # --------------------------------------------------------------------------
+    - stage:
+        name: Containerize and Publish
+        identifier: containerize_and_publish
+        description: Builds hardened container and pushes immutable commit-SHA tagged image to Docker Hub
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+          execution:
+            steps:
+              # Step: Build and Push Docker Image using native Harness Step
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: Build and Push to Docker Hub
+                  identifier: build_and_push_docker_hub
+                  spec:
+                    connectorRef: dockerhub_connector
+                    repo: <+pipeline.variables.dockerhub_username>/<+pipeline.variables.dockerhub_repo_name>
+                    tags:
+                      - <+codebase.commitSha>
+                      - latest
+                    dockerfile: Dockerfile
+                    context: .
+                    optimize: true
+                    caching: true

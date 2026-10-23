@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/target
+**/.idea
+**/*.iml
+**/.vscode
+**/*.log
+**/logs
+**/*.md
+.harness
+.github
+*.cmd
+*.bat
