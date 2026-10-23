@@ -540,6 +540,11 @@ Click the blue button: **`+ New Connector`**.
    - **Authentication:** Select `Username and Token`.
    - **Username:** Enter your GitHub username.
    - **Personal Access Token:** Click the dropdown ➔ Select **Existing Secret** ➔ Pick `github_pat`.
+   - **Enable API Access (CRITICAL FOR TRIGGERS & WEBHOOKS):**
+     - Check the box: **`Enable API access`** (or toggle **API Authentication**).
+     - Under **API Authentication**, select **`Token`** (or `Personal Access Token`).
+     - In the **Personal Access Token** dropdown, select **Existing Secret** ➔ Pick **`github_pat`** (reuse the same secret).
+     > **Why this is required:** When you create a Git Push Trigger, Harness calls the GitHub REST API to automatically register the webhook in your GitHub repo. Without enabling API access, Harness throws: `Invalid request: The given connector doesn't have api access field set`.
    - Click **Continue**.
 5. **Connectivity Mode Screen:**
    - Select radio button: **`Connect through Harness Platform`** (This uses Harness Cloud runners; no local delegate installation required!).
