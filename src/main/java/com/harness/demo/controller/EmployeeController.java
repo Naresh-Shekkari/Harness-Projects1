@@ -69,6 +69,7 @@ public class EmployeeController {
         log.info("REST request to update employee id={}", id);
         return ResponseEntity.ok(employeeService.updateEmployee(id, request));
     }
+    // new line added
 
     @DeleteMapping("/employees/{id}")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
@@ -77,3 +78,4 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 }
+
