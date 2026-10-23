@@ -22,7 +22,7 @@ pipeline:
     ci:
       codebase:
         connectorRef: github_connector
-        repoName: employee-service
+        repoName: Harness-Projects1
         build: <+input>
   stages:
     # --------------------------------------------------------------------------
