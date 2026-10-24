@@ -124,5 +124,3 @@ class EmployeeControllerTest {
                 .andExpect(status().isNoContent());
     }
 }
-
-// Added new line to check the harness automatic trigger added extra content
